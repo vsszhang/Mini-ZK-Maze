@@ -16,34 +16,43 @@ const ContractAddress = import.meta.env.VITE_APP_CONTRACT_ADDRESS;
 const Header = forwardRef((_props, ref) => {
   const dispatch = useDispatchStore();
 
-  const { selectedNetworkId } = useWeb3ModalState();
-  const { error, isPending, switchChain } = useSwitchChain();
+  // const { selectedNetworkId } = useWeb3ModalState();
+  // const { error, isPending, switchChain } = useSwitchChain();
   const { address } = useAccount();
 
+  // useEffect(() => {
+  //   if (String(selectedNetworkId) === String(Chain.id)) {
+  //     console.log("game is ready");
+  //     dispatchGameState &&
+  //       dispatchGameState({
+  //         type: "ready",
+  //         param: {
+  //           ready: true,
+  //         },
+  //       });
+  //   } else {
+  //     if (String(selectedNetworkId) !== String(Chain.id)) {
+  //       switchChain?.({ chainId: Chain.id });
+  //     }
+  //     console.log("game is lock");
+  //     dispatchGameState &&
+  //       dispatchGameState({
+  //         type: "ready",
+  //         param: {
+  //           ready: false,
+  //         },
+  //       });
+  //   }
+  // }, [selectedNetworkId, switchChain]);
+
   useEffect(() => {
-    if (String(selectedNetworkId) === String(Chain.id)) {
-      console.log("game is ready");
-      dispatchGameState &&
-        dispatchGameState({
-          type: "ready",
-          param: {
-            ready: true,
-          },
-        });
-    } else {
-      if (String(selectedNetworkId) !== String(Chain.id)) {
-        switchChain?.({ chainId: Chain.id });
-      }
-      console.log("game is lock");
-      dispatchGameState &&
-        dispatchGameState({
-          type: "ready",
-          param: {
-            ready: false,
-          },
-        });
-    }
-  }, [selectedNetworkId, switchChain]);
+    dispatchGameState({
+      type: "ready",
+      param: {
+        ready: true,
+      },
+    });
+  });
 
   const {
     data,
@@ -134,7 +143,7 @@ const Header = forwardRef((_props, ref) => {
         <w3m-button balance={"hide"} />
       </header>
 
-      {String(selectedNetworkId) !== String(Chain.id) && (
+      {/* {String(selectedNetworkId) !== String(Chain.id) && (
         <div className="wrap">
           <div role="alert" className="alert ">
             <svg
@@ -183,7 +192,7 @@ const Header = forwardRef((_props, ref) => {
             </div>
           )}
         </div>
-      )}
+      )} */}
     </>
   );
 });
