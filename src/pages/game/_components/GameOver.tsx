@@ -156,7 +156,7 @@ export const GameOver = ({
       prefix: "$",
       hideLoading: true,
       content: [
-        "Post game result to Arbitrum Sepolia?",
+        "Verify Your Game Path ZKP on verifer service?",
         <>
           {userSelect.current !== false && (
             <button
