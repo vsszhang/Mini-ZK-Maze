@@ -1,107 +1,185 @@
-export const PROGRAM_STRING = `proc.store_maze_info
-mem_store.101
-mem_store.102
-push.0.0 movup.3 movup.3
-mem_storew.103 dropw
-push.0.0 movup.3 movup.3
-mem_storew.104 dropw
-mem_store.105
-dup.0
-mem_store.106
-dup.0 push.0 gt
-push.1 swap
-while.true
-    push.0.0 movup.5 movup.5
-    push.200 dup.5 add mem_storew dropw add.1
-    dup.1 dup.1 gte
-end
-drop drop
+export const PROGRAM_STRING = `
+# Public Input: [map_length, map_width, shortest-_path_length, start_and_end_coordinate,
+#                obstacle_number, obstacle_coordinates]
+#
+#               test data of stack display:
+#               ["8", "8", "14", "1", "1", "8", "7", "11", "1", "5", "3", "1", "3", "3", "3", "5", "4", "4", "4", "7", "5", "2", "6", "6", "6", "8", "7", "2", "8", "4"]
+#               test data of real input(reverse display data):
+#               ["4", "8", "2", "7", "8", "6", "6", "6", "2", "5", "7", "4", "4", "4", "5", "3", "3", "3", "1", "3", "5", "1", "11", "7", "8", "1", "1", "14", "8", "8"]
+# Secret Input: [user_walk_coordinates]
+#               ["1", "1", "1", "2", "2", "2", "3", "2", "4", "2", "4", "3", "5", "3", "6", "3", "7", "3", "7", "4", "7", "5", "7", "6", "7", "7", "8", "7"]
+
+proc.store_maze_info
+    # store map length and width
+    push.0 dup mem_storew.100 dropw
+
+    # store path info and start-end coordinate
+    mem_store.101
+    mem_storew.102 dropw
+
+    # store obstacle number
+    mem_store.200
+
+    # store obstacle index
+    push.1 mem_store.10
+
+    push.1
+    while.true
+        # store obstacle coordinate
+        push.0.0 mem_load.10 push.200 add mem_storew dropw
+        
+        # update obstacle counter number
+        mem_load.10 add.1 mem_store.10
+
+        # keep while loop going or ending
+        push.1
+        if.true
+            mem_load.10 mem_load.200 lte
+        end
+    end
 end
 
-proc.check_start_point
-swap
-padw
-mem_loadw.103
-eqw
-movdn.8 dropw dropw
-mem_store.107
+proc.check_start
+    # load map start coordinate STACK: x_start, y_start, 0
+    mem_loadw.102 movup.3 movup.3 drop drop
+
+    # load user path coordinate STACK: y_user, x_user, x_start, y_start, 0
+    push.0 dup dup dup mem_loadw.401 drop drop
+
+    # move y_start to the top of stack STACK: y_start, y_user, x_user, x_start, 0
+    movup.3
+
+    # y_start eq y_user
+    assert_eq
+
+    # x_user eq x_start
+    assert_eq
 end
 
-proc.read_new_step
-adv_push.2 push.0.0 movup.2 movup.3
+proc.read_store_coordinate_update_counter
+    # update and store counter (counter + 1)
+    mem_load.11 push.1 add mem_store.11
+
+    # read and store coordinate
+    adv_push.2 push.0 dup mem_load.11 push.400 add mem_storew dropw
 end
 
-proc.check_step_consecutive
-movup.4
-
-dup.1 dup.1 dup.1 dup.1 gt
-if.true
-sub
-else
-swap sub
+proc.read_current_counter_index_coordinate
+    # clear stack before implement this procedure
+    # after implement it, STACK: x_user, y_user, 0
+    mem_load.11 push.400 add mem_loadw drop drop swap
 end
 
-swap drop
+proc.check_obstacle_overlap
+    # init counter
+    push.1 movdn.2
 
-movup.5 dup.3
+    push.1
+    while.true
+        # duplicate user coordinate y and x
+        dup.1 dup.1 padw
 
-dup.1 dup.1 dup.1 dup.1 gt
-if.true
-sub
-else
-swap sub
-end
-movup.3 add eq.1 mem_load.107 and mem_store.107 movup.6 movup.7 dropw
-end
+        # read obstacle coordinate STACK: x_o, y_o, x_u, y_u, ...
+        dup.8 push.200 add mem_loadw drop drop
 
-proc.check_absolute_value
-dup.1 dup.1 dup.1 dup.1 gt
-if.true
-sub
-else
-swap sub
-end
-end
+        # judge overlap STACK: x_u, x_o, y_o, y_u, ...
+        movup.2 eq movdn.2 eq and assertz
 
-proc.check_step_not_on_wall
-push.1 mem_load.106 dup.0 push.1 gte
-while.true
-    movdn.5 dup.0 push.200 add movdn.5 movdn.5 dupw movup.8 padw movup.4 mem_loadw eqw not
-    movdn.8 dropw dropw mem_load.107 and mem_store.107 movup.5 movup.5 add.1 swap dup.1 dup.1 lte
-end
-drop drop
+        # update counter
+        movup.2 push.1 add dup movdn.3 mem_load.200 lte
+    end
+    movup.2 drop
 end
 
-proc.check_step_is_end
-padw mem_loadw.104 eqw movdn.4 dropw
+proc.check_map_boundary
+    # dup user path coordinate
+    dup.1 dup.1 padw
+
+    # load mem_info STACK: map_length, map_width, x_u, y_u, x_u, y_u, 0
+    mem_loadw.100 drop drop
+
+    # STACK: y_u, map_length, map_width, x_u, x_u, y_u, 0
+    movup.3
+
+    # check boundary main logic
+    gte movdn.2 lte and assert
 end
 
-proc.check_row_and_column
-dup.1 dup.1 mem_load.101 mem_load.102 movup.3 gte movdn.2 lte and mem_load.107 and mem_store.107
+proc.check_coordinate_consecutive
+    # dup user path coordinate
+    dup.1 dup.1 padw
+
+    # calculate the previous coordinate STACK: y_before, x_before, x_now, y_now, x_now, y_now, 0
+    mem_load.11 sub.1 push.400 add mem_loadw drop drop
+
+    # STACK: y_now, y_before, x_before, x_now, x_now, y_now, 0
+    movup.3
+
+    dup.1 dup.1 lt
+    if.true
+        swap sub
+    else
+        sub
+    end
+
+    movdn.2
+    dup.1 dup.1 lt
+    if.true
+        swap sub
+    else
+        sub
+    end
+    
+    add push.1 assert_eq
+end
+
+proc.check_end
+    # read map end coordinate STACK: x_end, y_end, x_u, y_u, 0
+    padw push.102 mem_loadw drop drop
+
+    # STACK: x_u, x_end, y_end, y_u, 0
+    movup.2
+
+    # judge whether current coordinate is map end coordinate
+    # also, determine the while loop's loop condition
+    eq movdn.2 eq and not
 end
 
 begin
-exec.store_maze_info
-adv_push.2
-exec.check_start_point
-padw
-mem_loadw.103 push.1 mem_store.108 mem_load.107
-while.true
-exec.read_new_step exec.check_row_and_column exec.check_step_not_on_wall exec.check_step_consecutive exec.check_step_is_end dup.0 mem_store.109 mem_load.107 not or not
-mem_load.108 add.1 mem_store.108
-end
-dropw
+  exec.store_maze_info
+  
+  # init 11
+  push.1 mem_store.11
 
-mem_load.109 mem_load.107
-and
-assert
-mem_load.108 mem_load.105 sub
-eq.0
-if.true
+  # process first user path coordinate
+  adv_push.2 push.0 dup mem_load.11 push.400 add mem_storew dropw
+
+  # check whether the first user path coordinate is map start point
+  exec.check_start
+
+  # main loop
   push.1
-else
-  push.2
-end
+  while.true
+    exec.read_store_coordinate_update_counter
+
+    # The module finishes running,
+    # keeping the current path coordinates on the stack
+    exec.read_current_counter_index_coordinate
+    exec.check_obstacle_overlap
+    exec.check_map_boundary
+    exec.check_coordinate_consecutive
+    exec.check_end
+  end
+
+  # compare user path length with map shortest path length
+  # STACK: shortest_path_length user_path_length shortest_path_length user_path_length
+  push.11 mem_load push.101 mem_load dup.1 dup.1
+  
+  # user_path_length must gte shortest_path_length
+  gte assert
+
+  # Final output: 1 is shortest path, 0 is normal path (gt shortest path)
+  eq
 end
 `;
 
