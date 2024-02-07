@@ -22,6 +22,7 @@ import {
   isCollideType,
   gameSpeed,
   Role,
+  MiniZkMazeInfoData,
 } from "../_utils";
 // import play from "../_scripts/play";
 import { GameOver } from "./GameOver";
@@ -29,7 +30,6 @@ import { gameState, dispatch } from "../_utils";
 import Header from "./Header";
 import { Tip } from "./Tip";
 import { Description } from "./Description";
-import { getMap } from "@/api/zkp";
 import { toast } from "react-toastify";
 
 export const Game = () => {
@@ -43,15 +43,13 @@ export const Game = () => {
 
   useEffect(() => {
     console.log("Game run");
-    void Promise.all([getMap(), Assets.load("/spritesheet.json")])
-      .then(([mapInfo, sheet]) => {
+    void Promise.all([Assets.load("/spritesheet.json")])
+      .then(([sheet]) => {
         setLoading(false);
-        if (!mapInfo.data) {
-          return console.error("get map fail");
-        }
 
+        // Generate Mini Zk Maze Map Info
         const { Map, StartPosition, ExitPosition, ShortestPathLength } =
-          mapInfo.data;
+          MiniZkMazeInfoData;
         const StageHeightCells = Map.length;
         const StageWidthCells = Map[0].length;
         const StageHeight = StageHeightCells * CellSize;
@@ -78,8 +76,7 @@ export const Game = () => {
         for (let i = 0; i < StageHeightCells; i++) {
           for (let j = 0; j < StageWidthCells; j++) {
             if (Map[i][j] > 0) {
-              const TextureName =
-                TypeTextureMap[(Map as TextureType[][])[i][j]];
+              const TextureName = TypeTextureMap[Map[i][j]];
               const Texture = sheet.textures[TextureName];
               const sprite = new Sprite(Texture);
               sprite.width = CellSize;
