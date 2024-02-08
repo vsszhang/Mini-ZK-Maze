@@ -18,9 +18,10 @@ export type StoreDispatch = {
   param?: unknown;
 };
 
+// "Haven't Played" gameResult is 2
 const initialState: StoreType = {
   mapInfo: {} as mapInfo,
-  gameResult: 0,
+  gameResult: 2,
 };
 
 function reducer(state: StoreType, action: StoreDispatch) {
