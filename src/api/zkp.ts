@@ -17,3 +17,12 @@ export const getETH = (params: { ethAddress: `0x${string}` }) => {
     baseURL: CHAIN_SERVICE,
   });
 };
+
+export const zkpVerifyLocally = (params: string) => {
+  return instance.post(`/api/verify`, params, {
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: "bearer",
+    },
+  });
+};
