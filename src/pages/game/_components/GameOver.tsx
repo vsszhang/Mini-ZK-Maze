@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
-import { BaseError, ContractFunctionRevertedError } from "viem";
+// import { BaseError, ContractFunctionRevertedError } from "viem";
 import {
   useWaitForTransactionReceipt,
   useBalance,
@@ -17,20 +17,23 @@ import {
   RESULT_COLOR_MAP,
   idlFactory,
 } from "@/constants";
-import { Chain } from "../_utils";
+// import { Chain } from "../_utils";
 import * as myWorker from "../_utils/zkpWorker.ts";
-import { useWriteContract } from "wagmi";
+// import { useWriteContract } from "wagmi";
 import { useStateStore } from "@/store";
-import fetch from "isomorphic-fetch";
-import { Actor, HttpAgent } from "@dfinity/agent";
+// import fetch from "isomorphic-fetch";
+// import { Actor, HttpAgent } from "@dfinity/agent";
 import { useQueryClient } from "@tanstack/react-query";
+import { zkpVerifyLocally } from "@/api/zkp.ts";
+import { useDispatchStore } from "@/store";
+// import { dispatch } from "../_utils";
 
-const agent = new HttpAgent({ fetch, host: "https://ic0.app" });
+// const agent = new HttpAgent({ fetch, host: "https://ic0.app" });
 
-const canisterId = import.meta.env.VITE_APP_CANISTERID;
-const actor = Actor.createActor(idlFactory, { agent, canisterId });
+// const canisterId = import.meta.env.VITE_APP_CANISTERID;
+// const actor = Actor.createActor(idlFactory, { agent, canisterId });
 
-const ContractAddress = import.meta.env.VITE_APP_CONTRACT_ADDRESS;
+// const ContractAddress = import.meta.env.VITE_APP_CONTRACT_ADDRESS;
 
 export const GameOver = ({
   onRefresh,
@@ -40,6 +43,7 @@ export const GameOver = ({
   onExit: () => void;
 }) => {
   const balanceData = useRef<bigint>(0n);
+  const dispatch = useDispatchStore();
   const { address } = useAccount();
   const { data: blockNumber } = useBlockNumber({ watch: true });
   const { data: balance, queryKey } = useBalance({
@@ -63,13 +67,13 @@ export const GameOver = ({
   const [transactionHash, setTransactionHash] = useState<
     `0x${string}` | undefined
   >();
-  const [signature, setSignature] = useState<string | undefined>();
-  const [publicInputHash, setPublicInputHash] = useState<string | undefined>();
-  const [outputVec, setOutputVec] = useState<string | undefined>();
+  // const [signature, setSignature] = useState<string | undefined>();
+  // const [publicInputHash, setPublicInputHash] = useState<string | undefined>();
+  // const [outputVec, setOutputVec] = useState<string | undefined>();
   const [errorMsg, setErrorMsg] = useState<string | undefined>();
   const { gameResult } = useStateStore();
 
-  const { writeContractAsync } = useWriteContract();
+  // const { writeContractAsync } = useWriteContract();
 
   const contractResult = useWaitForTransactionReceipt({
     hash: transactionHash,
@@ -198,130 +202,150 @@ export const GameOver = ({
         });
       },
     },
-    {
-      prefix: "$",
-      content: [
-        "Minimum 0.002 ETH required.",
-        <>
-          <button
-            className="rounded-none text-warning btn btn-xs btn-ghost"
-            onClick={() => {
-              window.open("https://arbitrum-faucet.com/");
-            }}
-          >
-            [Faucet by Alchemy]
-          </button>
-          <button
-            className="rounded-none text-warning btn btn-xs btn-ghost"
-            onClick={() => {
-              window.open("https://faucet.quicknode.com/arbitrum/sepolia/");
-            }}
-          >
-            [Faucet by QuickNode]
-          </button>
-        </>,
-      ],
-      class: "text-error",
-      run: () => {
-        return new Promise((resolve) => {
-          const timer = setInterval(() => {
-            console.log("balance=", balanceData.current);
-            if (balanceData.current > 2000000000000000n) {
-              hiddenStepIndex.current = [4];
-              clearInterval(timer);
-              resolve(true);
-            }
-          }, 1000);
-        });
-      },
-    },
+    // {
+    //   prefix: "$",
+    //   content: [
+    //     "Minimum 0.002 ETH required.",
+    //     <>
+    //       <button
+    //         className="rounded-none text-warning btn btn-xs btn-ghost"
+    //         onClick={() => {
+    //           window.open("https://arbitrum-faucet.com/");
+    //         }}
+    //       >
+    //         [Faucet by Alchemy]
+    //       </button>
+    //       <button
+    //         className="rounded-none text-warning btn btn-xs btn-ghost"
+    //         onClick={() => {
+    //           window.open("https://faucet.quicknode.com/arbitrum/sepolia/");
+    //         }}
+    //       >
+    //         [Faucet by QuickNode]
+    //       </button>
+    //     </>,
+    //   ],
+    //   class: "text-error",
+    //   run: () => {
+    //     return new Promise((resolve) => {
+    //       const timer = setInterval(() => {
+    //         console.log("balance=", balanceData.current);
+    //         if (balanceData.current > 2000000000000000n) {
+    //           hiddenStepIndex.current = [4];
+    //           clearInterval(timer);
+    //           resolve(true);
+    //         }
+    //       }, 1000);
+    //     });
+    //   },
+    // },
     {
       prefix: ">",
-      content: ["Verify proof on a decentralized network"],
+      content: ["Verify proof on local ZKP VERIFIER service"],
       class: "text-success",
       run: () => {
         return new Promise((resolve, reject) => {
-          if (zkpResult) {
+          if (programHash && publicInput && zkpResult) {
             console.log("2/4:", programHash, publicInput, zkpResult);
-            actor
-              .zk_verify(programHash, publicInput, zkpResult)
+            const zkpVerifyPayload = JSON.stringify({
+              program_hash: programHash,
+              stack_inputs: publicInput,
+              zkp_result: JSON.parse(zkpResult),
+            }).replace(/\\/g, "");
+            zkpVerifyLocally(zkpVerifyPayload)
               .then((res) => {
-                console.log(res);
-                if (Array.isArray(res) && res.length === 3) {
-                  const [canister_Signature, publicInputHash, outputVec] = res;
-                  setSignature(canister_Signature);
-                  setPublicInputHash(publicInputHash);
-                  setOutputVec(outputVec);
+                const zkpVerifierResult = res.is_valid;
+                console.log("verifier result: ", zkpVerifierResult);
+                if (zkpVerifierResult === true) {
+                  // Store zkp verify result in gameResult
+                  dispatch &&
+                    dispatch({
+                      type: "update",
+                      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+                      param: Number(JSON.parse(zkpResult).outputs.stack[0]),
+                    });
                   resolve(true);
                 } else {
+                  // Update gameResult as 3, when failed to pass zkp verifier judgment.
+                  dispatch &&
+                    dispatch({
+                      type: "update",
+                      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+                      param: 3,
+                    });
                   reject(false);
                 }
               })
-              .catch(reject);
-          }
-        });
-      },
-    },
-    {
-      prefix: ">",
-      content: ["Post verification to Arbitrum Sepolia"],
-      class: "text-success",
-      run: () => {
-        return new Promise((resolve, reject) => {
-          if (typeof writeContractAsync === "function") {
-            console.log(
-              "3/4:",
-              `0x${signature}`,
-              programHash,
-              publicInputHash,
-              outputVec
-            );
-            try {
-              void writeContractAsync({
-                address: ContractAddress,
-                abi: ABI,
-                functionName: "verifyECDSASignature",
-                chainId: Chain.id,
-                args: [
-                  `0x${signature}`,
-                  programHash,
-                  publicInputHash,
-                  outputVec,
-                ],
-              })
-                .then((hash) => {
-                  console.log("writeContractAsync get", hash);
-                  if (hash) {
-                    setTransactionHash(hash);
-
-                    resolve(true);
-                  } else {
-                    reject("contract fetch error");
-                  }
-                })
-                .catch(() => {
-                  reject("contract send error");
-                });
-            } catch (err) {
-              if (err instanceof BaseError) {
-                const revertError = err.walk(
-                  (err) => err instanceof ContractFunctionRevertedError
-                );
-                if (revertError instanceof ContractFunctionRevertedError) {
-                  const errorName = revertError.data?.errorName ?? "";
-                  console.log(errorName);
-                }
-              }
-            }
+              .catch((error) => {
+                console.log(error);
+              });
+            console.log("Over, kids");
           } else {
-            reject("contract init error");
+            reject;
           }
         });
       },
     },
+    // {
+    //   prefix: ">",
+    //   content: ["Post verification to Arbitrum Sepolia"],
+    //   class: "text-success",
+    //   run: () => {
+    //     return new Promise((resolve, reject) => {
+    //       if (typeof writeContractAsync === "function") {
+    //         console.log(
+    //           "3/4:",
+    //           `0x${signature}`,
+    //           programHash,
+    //           publicInputHash,
+    //           outputVec
+    //         );
+    //         try {
+    //           void writeContractAsync({
+    //             address: ContractAddress,
+    //             abi: ABI,
+    //             functionName: "verifyECDSASignature",
+    //             chainId: Chain.id,
+    //             args: [
+    //               `0x${signature}`,
+    //               programHash,
+    //               publicInputHash,
+    //               outputVec,
+    //             ],
+    //           })
+    //             .then((hash) => {
+    //               console.log("writeContractAsync get", hash);
+    //               if (hash) {
+    //                 setTransactionHash(hash);
+
+    //                 resolve(true);
+    //               } else {
+    //                 reject("contract fetch error");
+    //               }
+    //             })
+    //             .catch(() => {
+    //               reject("contract send error");
+    //             });
+    //         } catch (err) {
+    //           if (err instanceof BaseError) {
+    //             const revertError = err.walk(
+    //               (err) => err instanceof ContractFunctionRevertedError
+    //             );
+    //             if (revertError instanceof ContractFunctionRevertedError) {
+    //               const errorName = revertError.data?.errorName ?? "";
+    //               console.log(errorName);
+    //             }
+    //           }
+    //         }
+    //       } else {
+    //         reject("contract init error");
+    //       }
+    //     });
+    //   },
+    // },
     {
       prefix: ">",
-      content: ["Determine achievement on-chain"],
+      content: ["Determine achievement from ZK VM output"],
       class: "text-success",
       run: () => {
         return new Promise((resolve) => {
@@ -366,6 +390,7 @@ export const GameOver = ({
                 <span className="loading loading-ball loading-xs"></span>
               )}
               {log.content.map((cont, index) => (
+                // eslint-disable-next-line react/jsx-key
                 <code
                   style={
                     index > 0
@@ -406,7 +431,7 @@ export const GameOver = ({
               [Save ZKP]
             </button>
           )}
-          {transactionHash && (
+          {/* {transactionHash && (
             <button
               className="rounded-none text-success btn btn-xs btn-ghost"
               onClick={() =>
@@ -417,7 +442,7 @@ export const GameOver = ({
             >
               [Browse Transaction]
             </button>
-          )}
+          )} */}
           {(SettlementOver || errorMsg) && (
             <button
               className="rounded-none text-error btn btn-xs btn-ghost"
