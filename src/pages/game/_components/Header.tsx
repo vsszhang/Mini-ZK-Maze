@@ -1,6 +1,6 @@
 import { useImperativeHandle, forwardRef, useEffect } from "react";
 import { useSwitchChain, useReadContract, useAccount } from "wagmi";
-import { useWeb3ModalState } from "@web3modal/wagmi/react";
+// import { useWeb3ModalState } from "@web3modal/wagmi/react";
 import { useDispatchStore } from "@/store";
 import {
   ABI,
@@ -9,12 +9,14 @@ import {
   RESULT_DESCRIPTION,
 } from "@/constants";
 import { dispatch as dispatchGameState, Chain } from "../_utils";
+import { useStateStore } from "@/store";
 
 const ContractAddress = import.meta.env.VITE_APP_CONTRACT_ADDRESS;
 
 // eslint-disable-next-line react/display-name
 const Header = forwardRef((_props, ref) => {
   const dispatch = useDispatchStore();
+  const { gameResult } = useStateStore();
 
   // const { selectedNetworkId } = useWeb3ModalState();
   // const { error, isPending, switchChain } = useSwitchChain();
@@ -54,7 +56,7 @@ const Header = forwardRef((_props, ref) => {
     });
   });
 
-  const {
+  let {
     data,
     isPending: isContractLoading,
     isSuccess: isContractSuccess,
@@ -65,6 +67,8 @@ const Header = forwardRef((_props, ref) => {
     functionName: "checkUserAchievement",
     args: [address],
   });
+
+  data = gameResult;
 
   useEffect(() => {
     if (isContractSuccess) {
@@ -94,7 +98,7 @@ const Header = forwardRef((_props, ref) => {
         <div className="font-semibold flex-1 text-primary text-2xl">
           ZK Maze
         </div>
-        {Number(data) !== 0 ? (
+        {Number(data) !== 2 ? (
           <div className="flex h-full w-full top-0 left-0 justify-center items-center absolute">
             <div
               className="tooltip tooltip-bottom tooltip-accent"
@@ -140,7 +144,7 @@ const Header = forwardRef((_props, ref) => {
             </div>
           </div>
         ) : null}
-        <w3m-button balance={"hide"} />
+        {/* <w3m-button balance={"hide"} /> */}
       </header>
 
       {/* {String(selectedNetworkId) !== String(Chain.id) && (
