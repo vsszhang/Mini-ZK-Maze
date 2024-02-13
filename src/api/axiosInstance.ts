@@ -7,12 +7,10 @@ declare module "axios" {
   }
 }
 
-export const CHAIN_SERVICE = "https://nitro-faucet.zkid.xyz";
-
 export const CARD_SERVICE =
   import.meta.env.MODE === "production"
-    ? "https://card-service.zkid.app"
-    : "https://card-service.zkid.xyz";
+    ? "https://example.com"
+    : "http://localhost:5678";
 
 // 创建请求实例
 const instance = axios.create({
@@ -32,10 +30,11 @@ instance.interceptors.request.use(function (config) {
 // 响应后处理
 instance.interceptors.response.use(
   function (response) {
-    if (response?.data?.code !== 200) {
-      throw new Error(response?.data?.msg);
+    console.log("axios response: ", response);
+    if (response.status !== 200) {
+      throw new Error(response?.msg);
     } else {
-      return response.data;
+      return response;
     }
   },
   function (error: { response: { status: unknown }; message: unknown }) {

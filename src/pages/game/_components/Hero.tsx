@@ -1,9 +1,4 @@
-// import { ButtonEnable } from "@/components";
-import { useWeb3Modal } from "@web3modal/wagmi/react";
-
 export const Hero = () => {
-  const { open } = useWeb3Modal();
-
   return (
     <div
       className="min-h-screen hero"
@@ -20,9 +15,8 @@ export const Hero = () => {
             shortest path, skillfully avoid obstacles, and victory is within
             reach. Ready? Adventure is calling!
           </p>
-          {/* <ButtonEnable /> */}
-          <button className="btn btn-primary" onClick={() => void open()}>
-            Connect Wallet to Play
+          <button className="btn btn-primary" onClick={() => {}}>
+            Start the game
           </button>
         </div>
       </div>

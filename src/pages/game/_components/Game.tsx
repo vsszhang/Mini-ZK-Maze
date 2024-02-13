@@ -22,6 +22,7 @@ import {
   isCollideType,
   gameSpeed,
   Role,
+  MiniZkMazeInfoData,
 } from "../_utils";
 // import play from "../_scripts/play";
 import { GameOver } from "./GameOver";
@@ -29,12 +30,10 @@ import { gameState, dispatch } from "../_utils";
 import Header from "./Header";
 import { Tip } from "./Tip";
 import { Description } from "./Description";
-import { getMap } from "@/api/zkp";
 import { toast } from "react-toastify";
 
 export const Game = () => {
   const wrapRef = useRef<HTMLDivElement>(null);
-  const headerRef = useRef<{ refetch: () => void }>(null);
   const [loading, setLoading] = useState(true);
   const { bindKey } = keystrokes as unknown as Keystrokes;
   const [gameIsOver, setGameOver] = useState(false);
@@ -43,15 +42,13 @@ export const Game = () => {
 
   useEffect(() => {
     console.log("Game run");
-    void Promise.all([getMap(), Assets.load("/spritesheet.json")])
-      .then(([mapInfo, sheet]) => {
+    void Promise.all([Assets.load("/spritesheet.json")])
+      .then(([sheet]) => {
         setLoading(false);
-        if (!mapInfo.data) {
-          return console.error("get map fail");
-        }
 
+        // Generate Mini Zk Maze Map Info
         const { Map, StartPosition, ExitPosition, ShortestPathLength } =
-          mapInfo.data;
+          MiniZkMazeInfoData;
         const StageHeightCells = Map.length;
         const StageWidthCells = Map[0].length;
         const StageHeight = StageHeightCells * CellSize;
@@ -78,8 +75,7 @@ export const Game = () => {
         for (let i = 0; i < StageHeightCells; i++) {
           for (let j = 0; j < StageWidthCells; j++) {
             if (Map[i][j] > 0) {
-              const TextureName =
-                TypeTextureMap[(Map as TextureType[][])[i][j]];
+              const TextureName = TypeTextureMap[Map[i][j]];
               const Texture = sheet.textures[TextureName];
               const sprite = new Sprite(Texture);
               sprite.width = CellSize;
@@ -269,19 +265,14 @@ export const Game = () => {
 
   return (
     <div>
-      <Header ref={headerRef} />
+      <Header />
 
       <div className="my-8 wrap">
         <div
           ref={wrapRef}
           className="flex relative flex-col items-center justify-center w-[640px] h-[640px] m-auto rounded-2xl bg-neutral overflow-hidden"
         >
-          {gameIsOver && (
-            <GameOver
-              onRefresh={() => headerRef && headerRef.current?.refetch?.()}
-              onExit={reStartGame}
-            />
-          )}
+          {gameIsOver && <GameOver onRefresh={() => {}} onExit={reStartGame} />}
           {loading && <div className="skeleton w-full h-full"></div>}
         </div>
       </div>

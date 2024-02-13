@@ -6,6 +6,14 @@ export type Step = {
   y: number;
 };
 export type TextureType = 0 | 1 | 2 | 3 | 4;
+
+export type MiniZkMazeTextureType = {
+  Map: TextureType[][];
+  StartPosition: Step;
+  ExitPosition: Step;
+  ShortestPathLength: number;
+};
+
 export const TypeTextureMap: Record<TextureType, string> = {
   0: "tile_0468.png", // 地面
   1: "tile_0292.png", // 树
@@ -41,3 +49,25 @@ export const ExitPosition: Step = {
 };
 
 export const ShortestPathLength = 19;
+
+export const MiniZkMazeInfoData: MiniZkMazeTextureType = {
+  Map: [
+    [0, 0, 0, 0, 0, 1, 0, 0],
+    [0, 0, 0, 1, 0, 0, 0, 3],
+    [0, 0, 0, 0, 0, 1, 0, 0],
+    [1, 0, 1, 0, 0, 0, 0, 0],
+    [0, 0, 0, 4, 0, 0, 0, 1],
+    [0, 0, 1, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 4, 0, 1, 0],
+    [0, 0, 1, 0, 0, 0, 0, 0],
+  ],
+  StartPosition: {
+    x: 0,
+    y: 7,
+  },
+  ExitPosition: {
+    x: 7,
+    y: 1,
+  },
+  ShortestPathLength: 14,
+};
