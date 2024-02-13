@@ -34,7 +34,6 @@ import { toast } from "react-toastify";
 
 export const Game = () => {
   const wrapRef = useRef<HTMLDivElement>(null);
-  const headerRef = useRef<{ refetch: () => void }>(null);
   const [loading, setLoading] = useState(true);
   const { bindKey } = keystrokes as unknown as Keystrokes;
   const [gameIsOver, setGameOver] = useState(false);
@@ -266,19 +265,14 @@ export const Game = () => {
 
   return (
     <div>
-      <Header ref={headerRef} />
+      <Header />
 
       <div className="my-8 wrap">
         <div
           ref={wrapRef}
           className="flex relative flex-col items-center justify-center w-[640px] h-[640px] m-auto rounded-2xl bg-neutral overflow-hidden"
         >
-          {gameIsOver && (
-            <GameOver
-              onRefresh={() => headerRef && headerRef.current?.refetch?.()}
-              onExit={reStartGame}
-            />
-          )}
+          {gameIsOver && <GameOver onRefresh={() => {}} onExit={reStartGame} />}
           {loading && <div className="skeleton w-full h-full"></div>}
         </div>
       </div>
