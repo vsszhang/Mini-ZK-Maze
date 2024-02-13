@@ -7,11 +7,9 @@ declare module "axios" {
   }
 }
 
-export const CHAIN_SERVICE = "https://nitro-faucet.zkid.xyz";
-
 export const CARD_SERVICE =
   import.meta.env.MODE === "production"
-    ? "https://card-service.zkid.app"
+    ? "https://example.com"
     : "http://localhost:5678";
 
 // 创建请求实例
@@ -36,8 +34,7 @@ instance.interceptors.response.use(
     if (response.status !== 200) {
       throw new Error(response?.msg);
     } else {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-      return response.data;
+      return response;
     }
   },
   function (error: { response: { status: unknown }; message: unknown }) {

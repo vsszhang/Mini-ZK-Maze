@@ -162,7 +162,8 @@ export const GameOver = ({
             }).replace(/\\/g, "");
             zkpVerifyLocally(zkpVerifyPayload)
               .then((res) => {
-                const zkpVerifierResult = res.is_valid;
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+                const zkpVerifierResult = res.data.is_valid;
                 console.log("verifier result: ", zkpVerifierResult);
                 if (zkpVerifierResult === true) {
                   // Store zkp verify result in gameResult
