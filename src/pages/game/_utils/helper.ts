@@ -157,11 +157,11 @@ export const generatePublicInput = (
   const result: number[] = [
     rows,
     cols,
+    ShortestPathLength,
     StartPosition.x,
     StartPosition.y,
     EndPosition.x,
     EndPosition.y,
-    ShortestPathLength,
   ];
   const ObstacleArray: Step[] = filterMapPoint(
     Map,

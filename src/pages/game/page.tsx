@@ -1,19 +1,10 @@
-import { Hero } from "./_components/Hero";
+import { useStateStore } from "@/store";
 import { Game } from "./_components/Game";
-import { useAccountEffect } from "wagmi";
-import { useState } from "react";
+import { Hero } from "./_components/Hero";
 
 export default function GamePage() {
-  const [isConnected, setIsconnected] = useState(false);
+  const { isStart } = useStateStore();
+  console.log("Is game start: ", isStart);
 
-  useAccountEffect({
-    onConnect() {
-      setIsconnected(true);
-    },
-    onDisconnect() {
-      window.location.reload();
-    },
-  });
-
-  return isConnected ? <Game /> : <Hero />;
+  return isStart ? <Game /> : <Hero />;
 }

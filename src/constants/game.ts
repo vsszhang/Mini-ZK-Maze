@@ -1,13 +1,15 @@
-export const RESULT_COLOR_MAP = ["error", "success", "primary"];
+export const RESULT_COLOR_MAP = ["primary", "success", "error", "error"];
 
 export const RESULT_MAP = [
-  "Haven't Played",
-  "Shortcut Genius",
   "Maze Navigator",
+  "Shortcut Genius",
+  "Haven't Played",
+  "Verifier -_-",
 ];
 
 export const RESULT_DESCRIPTION = [
-  "You haven't played this game yet.",
-  "Escaped the maze in the shortest path.",
   "Escaped the maze.",
+  "Escaped the maze in the shortest path.",
+  "You haven't played this game yet.",
+  "Failed to pass zkp verifier judgment.",
 ];

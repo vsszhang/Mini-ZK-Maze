@@ -1,19 +1,10 @@
-import instance, { CHAIN_SERVICE } from "./axiosInstance";
+import instance from "./axiosInstance";
 
-export const upload = (params: FormData) => {
-  return instance.post(`/api/s3/upload`, params, {
+export const zkpVerifyLocally = (params: string) => {
+  return instance.post(`/api/verify`, params, {
     headers: {
-      "Content-Type": "multipart/form-data",
+      "Content-Type": "application/json",
+      Authorization: "bearer",
     },
-  });
-};
-
-export const getMap = () => {
-  return instance.get(`/api/zkmaze/generate`);
-};
-
-export const getETH = (params: { ethAddress: `0x${string}` }) => {
-  return instance.post(`/sendEth`, params, {
-    baseURL: CHAIN_SERVICE,
   });
 };
