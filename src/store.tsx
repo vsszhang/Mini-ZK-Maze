@@ -11,6 +11,7 @@ type mapInfo = {
 export type StoreType = {
   mapInfo: mapInfo;
   gameResult: number;
+  isStart: boolean;
 };
 
 export type StoreDispatch = {
@@ -22,6 +23,7 @@ export type StoreDispatch = {
 const initialState: StoreType = {
   mapInfo: {} as mapInfo,
   gameResult: 2,
+  isStart: false,
 };
 
 function reducer(state: StoreType, action: StoreDispatch) {
@@ -33,6 +35,9 @@ function reducer(state: StoreType, action: StoreDispatch) {
       break;
     case "map":
       result.mapInfo = action.param as mapInfo;
+      break;
+    case "start":
+      result.isStart = action.param as boolean;
       break;
 
     default:
